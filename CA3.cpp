@@ -2,6 +2,7 @@
 #include <sstream>
 #include <vector>
 #include <tuple>
+#include <fstream>
 
 #define SEPERATOR   ' '
 #define CONTINUE    "continue"
@@ -73,10 +74,10 @@ void printGraph() {
     }
 }
 
-vector<string> getInput(){
-    cout << "input command:\n"; 
+vector<string> getInput(ifstream& input){
+    // cout << "input command:\n"; 
     string command;
-    getline(cin,command);
+    getline(input,command);
     stringstream ss(command);
     string s;
     vector<string> parsedCommand;
@@ -186,11 +187,16 @@ int processInput(vector<string> parsedCommand){
 }
 
 int main(){
-
+    ifstream inputFile("input.txt");
+    if (!inputFile) {
+    cout << "Failed to open the input file." << endl;
+    return 1;
+    }
+    
     int currAns=1;
     while(currAns==1){
     vector<string> currInput;
-    currInput = getInput();
+    currInput = getInput(inputFile);
     currAns = processInput(currInput);
     }
     return 0;
