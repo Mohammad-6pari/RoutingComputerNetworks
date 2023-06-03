@@ -13,8 +13,6 @@
 #define MODIFY  "modify"
 using namespace std;
 
-int graphSize = 1000;
-vector<Node> graph(graphSize);
 
 struct Edge{
     int neighbor;
@@ -25,6 +23,9 @@ struct Node{
     int id;
     vector<Edge> neighbors;
 };
+
+int graphSize = 1000;
+vector<Node> graph(graphSize);
 
 bool edgeExists(const vector<Edge>& neighbors, int neighbor) {
     for (const Edge& edge : neighbors) {
@@ -122,11 +123,23 @@ void printAdjacencyMatrix() {
         }
     }
 
+    cout << "  | ";
+    for (const Node  node : graph){
+        cout << node.id << " ";
+    }
+    cout << "\n----";
+    for (int i=0;i<graph.size();i++){
+        cout << "--";
+    }
+    cout << endl;
+    int ind=0;
     for (const vector<int>& row : adjacencyMatrix) {
+        cout << graph[ind].id<<" | ";
         for (int val : row) {
             cout << val << " ";
         }
-        cout << endl;
+        ind++;
+        cout<<endl;
     }
 }
 
@@ -135,7 +148,6 @@ int processInput(vector<string> parsedCommand){
     if (command==TOPOLOGY){
         graphSize= parsedCommand.size()+1;
         graph.resize(graphSize);
-        graph.clear();
         for (int i = 0; i < graphSize; i++) {
             graph[i].id = i;
         }
@@ -187,7 +199,7 @@ int processInput(vector<string> parsedCommand){
 }
 
 int main(){
-    ifstream inputFile("input.txt");
+    ifstream inputFile("inputs.txt");
     if (!inputFile) {
     cout << "Failed to open the input file." << endl;
     return 1;
