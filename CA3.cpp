@@ -40,21 +40,34 @@ bool edgeExists(const vector<Edge>& neighbors, int neighbor) {
 }
 
 void removePath(int node1, int node2) {
-    if (node1 >= 0 && node1 < graphSize && node2 >= 0 && node2 < graphSize) {
+    int flag=1;
+    if (node1 >= 0 && node1 < graphSize && node2 >= 0 && node2 < graphSize && node1 != node2) {
         for (size_t i = 0; i < graph[node1].neighbors.size(); i++) {
             if (graph[node1].neighbors[i].neighbor == node2) {
-                graph[node1].neighbors.erase(graph[node1].neighbors.begin() + i);
+                if (graph[node1].neighbors[i].cost>0){
+                    graph[node1].neighbors.erase(graph[node1].neighbors.begin() + i);
+                    flag=-1;
+                    break;
+                    }
+                else if (graph[node1].neighbors[i].cost==NO_PATH_COST){
+                    cout << "Error: No path exist." << endl;
+                    return;
+                }
                 break;
             }
         }
 
         for (size_t i = 0; i < graph[node2].neighbors.size(); i++) {
             if (graph[node2].neighbors[i].neighbor == node1) {
-                graph[node2].neighbors.erase(graph[node2].neighbors.begin() + i);
-                break;
+                    graph[node2].neighbors.erase(graph[node2].neighbors.begin() + i);
+                    break;
             }
         }
-        cout << "OK" << endl;
+        if (flag==-1)
+            cout << "OK" << endl;
+        else
+            cout << "Error: There is no path between these nodes." << endl;
+
     } else {
         cout << "Error: Invalid node IDs." << endl;
     }
