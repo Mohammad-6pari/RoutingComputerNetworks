@@ -11,6 +11,8 @@
 #define NODE_SEPERATOR  '-'
 #define SHOW    "show"
 #define MODIFY  "modify"
+#define NO_PATH_COST    -1
+#define ZERO    0
 using namespace std;
 
 
@@ -65,16 +67,6 @@ void addEdge(int node1, int node2, int cost) {
     }
 }
 
-void printGraph() {
-    for (const Node& node : graph) {
-        cout << "Node " << node.id << " Neighbors: ";
-        for (const Edge& edge : node.neighbors) {
-            cout << edge.neighbor << " (Cost: " << edge.cost << ") ";
-        }
-        cout << endl;
-    }
-}
-
 vector<string> getInput(ifstream& input){
     // cout << "input command:\n"; 
     string command;
@@ -111,7 +103,9 @@ tuple<int,int,int> parseTopologyCommand(const string& input){
 void printAdjacencyMatrix() {
     int numNodes = graph.size();
 
-    vector<vector<int>> adjacencyMatrix(numNodes, vector<int>(numNodes, 0));
+    vector<vector<int>> adjacencyMatrix(numNodes, vector<int>(numNodes, NO_PATH_COST));
+    for (int i=0;i<adjacencyMatrix.size();i++)
+        adjacencyMatrix[i][i]=0;
 
     for (const Node& node : graph) {
         int nodeId = node.id;
