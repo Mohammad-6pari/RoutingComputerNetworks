@@ -13,6 +13,7 @@
 #define MODIFY  "modify"
 #define NO_PATH_COST    -1
 #define ZERO    0
+#define REMOVE  "remove"
 using namespace std;
 
 
@@ -37,6 +38,28 @@ bool edgeExists(const vector<Edge>& neighbors, int neighbor) {
     }
     return false;
 }
+
+void removePath(int node1, int node2) {
+    if (node1 >= 0 && node1 < graphSize && node2 >= 0 && node2 < graphSize) {
+        for (size_t i = 0; i < graph[node1].neighbors.size(); i++) {
+            if (graph[node1].neighbors[i].neighbor == node2) {
+                graph[node1].neighbors.erase(graph[node1].neighbors.begin() + i);
+                break;
+            }
+        }
+
+        for (size_t i = 0; i < graph[node2].neighbors.size(); i++) {
+            if (graph[node2].neighbors[i].neighbor == node1) {
+                graph[node2].neighbors.erase(graph[node2].neighbors.begin() + i);
+                break;
+            }
+        }
+        cout << "OK" << endl;
+    } else {
+        cout << "Error: Invalid node IDs." << endl;
+    }
+}
+
 
 void addEdge(int node1, int node2, int cost) {
     if (edgeExists(graph[node1].neighbors, node2)) {
@@ -100,6 +123,23 @@ tuple<int,int,int> parseTopologyCommand(const string& input){
 
 }
 
+tuple<int,int> parseRemoveCommand(const string& input){
+    istringstream iss(input);
+
+    string token;
+    int node1, node2;
+
+    getline(iss, token, NODE_SEPERATOR);
+    node1 = stoi(token);
+
+    getline(iss, token, NODE_SEPERATOR);
+    node2 = stoi(token);
+
+    return make_tuple(node1, node2);
+
+}
+
+
 void printAdjacencyMatrix() {
     int numNodes = graph.size();
 
@@ -162,6 +202,13 @@ int processInput(vector<string> parsedCommand){
 
     } else if (command==SHOW){
         printAdjacencyMatrix();
+        return 1;
+
+    } else if (command==REMOVE) {
+        string currInp=parsedCommand[1];
+        int node1,node2;
+        tie(node1, node2) = parseRemoveCommand(currInp);
+        removePath(node1,node2);
         return 1;
 
     } else if (command==MODIFY){
