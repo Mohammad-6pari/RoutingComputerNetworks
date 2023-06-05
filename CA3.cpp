@@ -3,6 +3,9 @@
 #include <vector>
 #include <tuple>
 #include <fstream>
+#include <limits>
+#include <queue>
+#include <stack>
 
 #define SEPERATOR   ' '
 #define CONTINUE    "continue"
@@ -14,6 +17,11 @@
 #define NO_PATH_COST    -1
 #define ZERO    0
 #define REMOVE  "remove"
+#define LSRP    "lsrp"
+#define DVRP    "dvrp"
+#define SET_MAX    "set-max"
+
+
 using namespace std;
 
 
@@ -152,6 +160,128 @@ tuple<int,int> parseRemoveCommand(const string& input){
 
 }
 
+void calculateLSRP(int source) {
+    int numNodes = graph.size();
+    const int INF = numeric_limits<int>::max();
+
+    vector<int> distance(numNodes, INF);
+    distance[source] = 0;
+
+    vector<bool> visited(numNodes, false);
+    vector<int> parent(numNodes, -1);
+    for (int step = 0; step < numNodes - 1; ++step) {
+        int minDistance = INF;
+        int minIndex = -1;
+        for (int j = 0; j < numNodes; ++j) {
+            if (!visited[j] && distance[j] < minDistance) {
+                minDistance = distance[j];
+                minIndex = j;
+            }
+        }
+        visited[minIndex] = true;
+        for (const Edge& edge : graph[minIndex].neighbors) {
+            int neighbor = edge.neighbor;
+            int cost = edge.cost;
+            if (!visited[neighbor] && distance[minIndex] != INF && distance[minIndex] + cost < distance[neighbor]) {
+                distance[neighbor] = distance[minIndex] + cost;
+                parent[neighbor] = minIndex;
+            }
+        }
+
+        // Print the minimum cost in each step
+        cout << "Step " << step + 1 << ": Minimum Cost from " << source << " to each node:" << endl;
+        for (int i = 0; i < numNodes; ++i) {
+            if (i != source) {
+                int printedVal = (distance[i]==INF)?-1:distance[i];
+                cout << "Node " << i << ": " << printedVal << endl;
+            }
+        }
+        cout << endl;
+    }
+
+    // Print the shortest path and minimum cost at the end
+    cout << "Shortest Path and Minimum Cost from " << source << " to each node:" << endl;
+    for (int i = 0; i < numNodes; ++i) {
+        if (i != source) {
+            int currentNode = i;
+            stack<int> shortestPath;
+            while (currentNode != -1) {
+                shortestPath.push(currentNode);
+                currentNode = parent[currentNode];
+            }
+
+            cout << "Node " << i << ": ";
+            while (!shortestPath.empty()) {
+                cout << shortestPath.top() << " ";
+                shortestPath.pop();
+            }
+            cout << "(Cost: " << distance[i] << ")" << endl;
+        }
+    }
+}
+
+void calculateDVRP(int source) {
+    int numNodes = graph.size();
+    const int INF = 10000;
+
+    vector<int> distance(numNodes, INF);
+    vector<int> nextHop(numNodes, -1);
+
+    distance[source] = 0;
+    nextHop[source] = source;
+    bool updated;
+    do {
+        updated = false;
+
+        for (int i = 0; i < numNodes; ++i) {
+            if (i == source) {
+                continue;
+            }
+
+            for (const Edge& edge : graph[i].neighbors) {
+                int neighbor = edge.neighbor;
+                int cost = edge.cost;
+
+                int newDistance = distance[i] + cost;
+
+                if (newDistance < distance[neighbor]) {
+                    distance[neighbor] = newDistance;
+                    nextHop[neighbor] = i;
+                    updated = true;
+                }
+            }
+        }
+    } while (updated);
+
+    cout << "Dest | Next Hop | Dist | Shortest-Path\n"
+         << "--------------------------------------\n";
+    for (int i = 0; i < numNodes; ++i) {
+        if (i != source) {
+            cout << i << "   " << source <<endl;
+            int currentNode = i;
+            stack<int> shortestPath;
+            while (currentNode != source) {
+
+                shortestPath.push(currentNode);
+                currentNode = nextHop[currentNode];
+            }
+
+            cout << i << "    | " << nextHop[i]
+                 << "         | " << distance[i] << "    | ";
+
+            while (!shortestPath.empty()) {
+                cout << shortestPath.top();
+                shortestPath.pop();
+
+                if (!shortestPath.empty()) {
+                    cout << " -> ";
+                }
+            }
+
+            cout << " -> " << i << endl;
+        }
+    }
+}
 
 void printAdjacencyMatrix() {
     int numNodes = graph.size();
@@ -192,13 +322,13 @@ void printAdjacencyMatrix() {
 
 int processInput(vector<string> parsedCommand){
     string command= (parsedCommand.size()>0)? parsedCommand[0] : CONTINUE;
-    if (command==TOPOLOGY){
-        graphSize= parsedCommand.size()+1;
+    if (command==SET_MAX){
+        graphSize= stoi(parsedCommand[1]);
         graph.resize(graphSize);
         for (int i = 0; i < graphSize; i++) {
             graph[i].id = i;
         }
-
+    } else if (command==TOPOLOGY){
         for(int i=1;i<parsedCommand.size();i++){
             string currInp = parsedCommand[i];
             int node1, node2, cost;
@@ -206,11 +336,12 @@ int processInput(vector<string> parsedCommand){
 
             if (node1==node2){
                 cout << "wrong input. source and destination node are equal.\n";
+                return 1;
             } else{
                 addEdge(node1,node2,cost);
-                cout << "OK\n";
             }
         }
+        cout << "OK\n";
         return 1;
 
     } else if (command==SHOW){
@@ -224,7 +355,7 @@ int processInput(vector<string> parsedCommand){
         removePath(node1,node2);
         return 1;
 
-    } else if (command==MODIFY){
+    } else if (command==MODIFY) {
         string currInp = parsedCommand[1];
         int node1, node2, cost;
         tie(node1, node2, cost) = parseTopologyCommand(currInp);
@@ -237,6 +368,30 @@ int processInput(vector<string> parsedCommand){
         }
         return 1;
 
+    } else if (command == LSRP) {
+        if(parsedCommand.size()==2){
+            int source = stoi(parsedCommand[1]);
+            calculateLSRP(source);
+            return 1;
+        } else {
+            for(int i=0;i<graph.size();i++){
+                int currrSource = graph[i].id;
+                calculateLSRP(currrSource);
+                return 1;
+            }
+        }        
+    } else if (command == DVRP) {
+       if(parsedCommand.size()==2){
+            int source = stoi(parsedCommand[1]);
+            calculateDVRP(source);
+            return 1;
+        } else {
+            for(int i=0;i<graph.size();i++){
+                int curSource = graph[i].id;
+                calculateDVRP(curSource);
+            }
+            return 1;
+        }    
     } else if (command==CONTINUE){
         cout << "no input found\n";
         return 1;
@@ -250,6 +405,7 @@ int processInput(vector<string> parsedCommand){
         return 1;
 
     }
+    return 1;
 }
 
 int main(){
