@@ -221,67 +221,55 @@ void calculateLSRP(int source) {
 }
 
 void calculateDVRP(int source) {
-    int numNodes = graph.size();
-    const int INF = 10000;
-
-    vector<int> distance(numNodes, INF);
-    vector<int> nextHop(numNodes, -1);
-
+    vector<int> distance(graphSize, INT_MAX);
+    vector<int> nextHop(graphSize, -1);
     distance[source] = 0;
-    nextHop[source] = source;
-    bool updated;
-    do {
-        updated = false;
 
-        for (int i = 0; i < numNodes; ++i) {
-            if (i == source) {
-                continue;
-            }
+    queue<int> q;
+    q.push(source);
 
-            for (const Edge& edge : graph[i].neighbors) {
-                int neighbor = edge.neighbor;
-                int cost = edge.cost;
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
 
-                int newDistance = distance[i] + cost;
+        for (int i = 0; i < graph[u].neighbors.size(); i++) {
+            int v = graph[u].neighbors[i].neighbor;
+            int cost = graph[u].neighbors[i].cost;
 
-                if (newDistance < distance[neighbor]) {
-                    distance[neighbor] = newDistance;
-                    nextHop[neighbor] = i;
-                    updated = true;
-                }
+            if (distance[v] > distance[u] + cost) {
+                distance[v] = distance[u] + cost;
+                nextHop[v] = u;
+                q.push(v);
             }
         }
-    } while (updated);
-
-    cout << "Dest | Next Hop | Dist | Shortest-Path\n"
-         << "--------------------------------------\n";
-    for (int i = 0; i < numNodes; ++i) {
+    }
+    cout << "DVRP for source:" << source <<"\n";
+    cout << "Dest|NextHop|Dist| Shortest-Path\n"
+        <<  "---------------------------------------------\n";
+    for (int i = 0; i < graphSize; i++) {
         if (i != source) {
-            cout << i << "   " << source <<endl;
-            int currentNode = i;
-            stack<int> shortestPath;
-            while (currentNode != source) {
+            cout << i << "   |   " << nextHop[i] << "   |  " << distance[i]<<" |  ";
 
-                shortestPath.push(currentNode);
-                currentNode = nextHop[currentNode];
+            stack<int> path;
+            int node = i;
+            while (node != source) {
+                path.push(node);
+                node = nextHop[node];
             }
+            path.push(source);
 
-            cout << i << "    | " << nextHop[i]
-                 << "         | " << distance[i] << "    | ";
-
-            while (!shortestPath.empty()) {
-                cout << shortestPath.top();
-                shortestPath.pop();
-
-                if (!shortestPath.empty()) {
-                    cout << " -> ";
-                }
+            cout << "[" ;
+            while (!path.empty()) {
+                cout << path.top();;
+                path.pop();
+                if(!path.empty())
+                    cout<< "->";
             }
-
-            cout << " -> " << i << endl;
+            cout << "]" <<endl;
         }
     }
 }
+
 
 void printAdjacencyMatrix() {
     int numNodes = graph.size();
