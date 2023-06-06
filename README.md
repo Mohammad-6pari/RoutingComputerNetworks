@@ -45,8 +45,27 @@ the printed value (just two last steps) for that graoh for source=1 shown below<
 ### `dvrp <source(optional):int>`
 this command executes dvrp algorithm on graph network and prints the distance,shortest path and next hop from source to all other nodes<br>
 the printed value for mentioned network for source=1 shown below<br>
-![i4](https://github.com/Mohammadreza6pari/CN/assets/94805623/9a840ce2-1407-45f1-9985-a89d03c3ef5a)
+![image](https://github.com/Mohammadreza6pari/CN/assets/94805623/823e8594-1a78-4622-9a0e-637e0fb357e9)
 
 ## Result Compares
+for node with id=1 , LSRP and DVRP algorithms before and after removing 4-10 edge is like as below :
 
+## DVRP (Before Removing)
+![image](https://github.com/Mohammadreza6pari/CN/assets/94805623/ccd3925e-cb65-44c6-b00f-086814de723a)
 
+<br>
+
+## DVRP (After Removing)
+![image](https://github.com/Mohammadreza6pari/CN/assets/94805623/40566246-e4cb-4807-97cd-b4882dd6f030)
+<br>
+as we see, after removing link the shortest path cost between 1,4 increases and as we expected, in DVRP the next hop for souce=1 and destination= 4 changes.  
+
+## LSRP (Before Removing)
+![image](https://github.com/Mohammadreza6pari/CN/assets/94805623/98f0f624-b2fe-499b-9646-262d632b1cbd)
+
+<br>
+
+## LSRP (After Removing)
+![image](https://github.com/Mohammadreza6pari/CN/assets/94805623/b288df65-231d-4e0a-8e78-dd62d548f84c) 
+<br>
+as we see, the steps didn't change because the number of nodes It is the same as before. and like DVRP part the min cost between 1 and 4 increased.
