@@ -221,7 +221,7 @@ void calculateLSRP(int source) {
 }
 
 void calculateDVRP(int source) {
-    vector<int> distance(graphSize, INT_MAX);
+    vector<int> distance(graphSize, INT8_MAX);
     vector<int> nextHop(graphSize, -1);
     distance[source] = 0;
 
